@@ -1,0 +1,7 @@
+langchain
+python-dotenv
+ipykernel  # Required for Jupyter Notebook support
+langchain-groq
+langchain_google_genai
+
+-e .

@@ -85,3 +85,14 @@ git clone https://github.com/yxkhan/document-portal.git
 2. Embedding Model #openai, hf, gemini
 
 3. Vector Database ##inmemory, ##ondisk, ##claudebased 
+
+
+#### GROQ API Key link
+```
+https://console.groq.com/keys
+```
+
+#### GEMINI API Key link
+```
+https://aistudio.google.com/app/apikey
+```
