@@ -2,7 +2,7 @@
 
 ## Document Analysis, Chat & Comparison Portal with Advanced RAGx
 ```
- In this module, you'll dive into building a robust, interactive portal for document analysis and
+ In this project, i have built a robust, interactive portal for document analysis and
  intelligent chat using advanced RAG pipelines. You'll learn to ingest and index documents,
  implement semantic search, and create conversational interfaces for both single and multiple
  documents. I have explored optimization with local LLMs, caching strategies, and reranking
