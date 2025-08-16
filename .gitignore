@@ -1,3 +1,9 @@
 env10
 .env
-document_portal.egg-info
+document_portal.egg-info\
+__pycache__/
+logs/
+*.pyc
+*.pyc
+faiss_index/
+main_archive/
