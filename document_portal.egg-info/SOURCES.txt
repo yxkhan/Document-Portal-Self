@@ -9,10 +9,11 @@ exception/custom_exception.py
 logger/__init__.py
 logger/custom_logger.py
 prompt/__init__.py
+prompt/prompt_library.py
 src/__init__.py
-src/document_analyser/__init__.py
-src/document_analyser/data_analysis.py
-src/document_analyser/data_ingestion.py
+src/document_analyzer/__init__.py
+src/document_analyzer/data_analysis.py
+src/document_analyzer/data_ingestion.py
 src/document_compare/__init__.py
 src/document_compare/data_ingestion.py
 src/document_compare/retrieval.py
