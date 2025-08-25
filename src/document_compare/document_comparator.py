@@ -10,9 +10,7 @@ from langchain_core.output_parsers import JsonOutputParser
 from langchain.output_parsers import OutputFixingParser
 
 class DocumentComparatorLLM:
-    def __init__(self):
-        pass
-    
+    def __init__(self):    
         load_dotenv()
         self.log = CustomLogger().get_logger(__name__)
         self.loader = ModelLoader()

@@ -3,8 +3,8 @@
 # The data must follow the schema defined in this pydatic model
 
 from pydantic import BaseModel, Field, RootModel
-from typing import Optional, List, Dict, Any
 from typing import Optional, List, Dict, Any, Union
+from enum import Enum
 
 #This is for Document Analysis pydantic model
 class Metadata(BaseModel):
@@ -26,3 +26,13 @@ class ChangeFormat(BaseModel):
 
 class SummaryResponse(RootModel[list[ChangeFormat]]):
     pass
+
+# This is for Contextual Question Answering pydantic model
+# Its important in the industry level project
+# We are using Enum class to define the prompt type
+#Sunny will explain you about Enum in the next class
+class PromptType(str, Enum):
+    DOCUMENT_ANALYSIS = "document_analysis"
+    DOCUMENT_COMPARISON = "document_comparison"
+    CONTEXTUALIZE_QUESTION = "contextualize_question"
+    CONTEXT_QA = "context_qa"
