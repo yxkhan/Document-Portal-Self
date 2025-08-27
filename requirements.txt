@@ -12,5 +12,6 @@ pandas
 streamlit
 langchain-core[tracing]
 langchain-core.chains
+docx2txt
 
 -e .

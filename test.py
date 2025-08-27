@@ -189,7 +189,8 @@ def test_document_ingestion_and_rag():
         
         rag = ConversationalRAG(session_id=session_id, retriever=retriever)
         
-        question = "what is President Zelenskyy said in their speech in parliament?"
+        #question = "what is President Zelenskyy said in their speech in parliament?"
+        question = "Explain the significance of the attention mechanism introduced in the paper?"
         
         answer=rag.invoke(question)
         
