@@ -150,5 +150,3 @@ if __name__ == "__main__":
 
     # Run the test
     test_conversational_rag_on_pdf(pdf_path, question)
-
-

@@ -189,3 +189,6 @@ class ConversationalRAG:
         except Exception as e:
             self.log.error("Failed to invoke conversational RAG", error=str(e), session_id=self.session_id)
             raise DocumentPortalException("Failed to invoke RAG chain", sys)
+
+
+#We had delete the Faiss Index which was created for Single doc chat, in order to create new one for Multi doc chat
