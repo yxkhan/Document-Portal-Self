@@ -13,5 +13,8 @@ streamlit
 langchain-core[tracing]
 langchain-core.chains
 docx2txt
+fastapi
+uvicorn
+python-multipart
 
 -e .
