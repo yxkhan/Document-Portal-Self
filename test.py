@@ -182,10 +182,10 @@ def test_document_ingestion_and_rag():
         
         retriever = ingestor.ingest_files(uploaded_files)  #ingest the files_content from the list, ingest and create the retriever
         
-        for f in uploaded_files:
+        for f in uploaded_files: #close the opned file
             f.close()
                 
-        session_id = "test_multi_doc_chat"  #defining the session id for versioning purpose
+        session_id = "test_multi_doc_chat"  #defining the session id with respect to the user who making the conversation
         
         rag = ConversationalRAG(session_id=session_id, retriever=retriever)
         

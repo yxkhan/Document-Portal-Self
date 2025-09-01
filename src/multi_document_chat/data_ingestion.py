@@ -64,7 +64,7 @@ class DocumentIngestor:
                     self.log.warning("Unsupported file skipped", filename=uploaded_file.name)  #Just raise the warning and
                     continue
                 unique_filename = f"{uuid.uuid4().hex[:8]}{ext}"   #Unique name for every file for versioning purpose
-                temp_path = self.session_temp_dir / unique_filename #Path to save the file
+                temp_path = self.session_temp_dir / unique_filename #Path to save the unique file
                 
                 with open(temp_path, "wb") as f:   #open the file in write binary mode
                     f.write(uploaded_file.read())  #write the file content to the temp_path

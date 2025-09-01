@@ -100,7 +100,7 @@ class ConversationalRAG:
     def _build_lcel_chain(self):    
     
         try:
-            # 1) Rewrite question using chat history
+            # 1) Rewrite question using chat history from the input question and chat history
             question_rewriter = (
                 {"input": itemgetter("input"), "chat_history": itemgetter("chat_history")}
                 | self.contextualize_prompt

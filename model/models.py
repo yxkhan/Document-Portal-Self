@@ -1,9 +1,10 @@
 # We have to keep all the pydantic models here
-# Pydatic is required for the data validation
+# Pydatic is required for the data validation and parsing 
+#It further uses python type annotations to validate the data (Optional, List, Dict, Any, Union)
 # The data must follow the schema defined in this pydatic model
 
 from pydantic import BaseModel, Field, RootModel
-from typing import Optional, List, Dict, Any, Union
+from typing import Optional, List, Dict, Any, Union #This is for type hinting
 from enum import Enum
 
 #This is for Document Analysis pydantic model
