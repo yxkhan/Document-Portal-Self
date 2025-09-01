@@ -1,0 +1,1 @@
+#One data ingestion class to handle all the data ingestion related tasks
