@@ -167,3 +167,4 @@ async def chat_query(
 # command for executing the fast api
 #Please note: change directory to api folder before running the below command
 # uvicorn api.main:app --reload
+#Code is working smooth
