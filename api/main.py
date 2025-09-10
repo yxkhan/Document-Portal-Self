@@ -4,20 +4,27 @@ from fastapi.middleware.cors import CORSMiddleware  # For handling Cross-Origin 
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import os
+import sys
 from typing import List, Optional, Any, Dict
+
+
+FAISS_BASE = os.getenv("FAISS_BASE", "faiss_index")
+UPLOAD_BASE = os.getenv("UPLOAD_BASE", "data")
+FAISS_INDEX_NAME = os.getenv("FAISS_INDEX_NAME", "index")  # <--- keep consistent with save_local()
 
 app = FastAPI(title="Documnet Portal API", version="0.1")
 
 from src.document_ingestion.data_ingestion import (
     DocHandler,
-    DocumnetComparator,
+    DocumentComparator,
     ChatIngestor,
     FaissManager
 )
-
 from src.document_analyzer.data_analysis import DocumentAnalyzer
 from src.document_compare.document_comparator import DocumentComparatorLLM
 from src.document_chat.retrieval import ConversationalRAG
+from logger.custom_logger import CustomLogger
+log = CustomLogger().get_logger(__name__)
 
 #This is for cloud to make the authentication of the keys and other factors
 app.add_middleware(
@@ -28,9 +35,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+#using absolute paths with Path so you don’t depend on where you run uvicorn.
+from pathlib import Path
+# resolve project root directory/folder
+BASE_DIR = Path(__file__).resolve().parent.parent  
+# static and templates directories
+STATIC_DIR = BASE_DIR / "static"
+TEMPLATES_DIR = BASE_DIR / "templates"
+
 # serve static & templates (.css and .html files)
-app.mount("/static", StaticFiles(directory="../static"), name="static")
-templates = Jinja2Templates(directory="../templates")
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+# setup templates
+templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 #This would also be our Homepage/entry-point for our application
 @app.get("/",response_class=HTMLResponse)  #root path pe jab bhi request aayegi ye function call hoga
@@ -52,21 +68,21 @@ class FastAPIFileAdapter:
         self._uf.file.seek(0)
         return self._uf.file.read()
 
-def _read_pdf_via_handler(handler: DocHandler, path:str) -> str:
-    """
-    Helper function to read PDF using DocHandler.
-    """
-    try:
-        pass
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error reading PDF: {str(e)}")
+
+def _read_pdf_via_handler(handler: DocHandler, path: str) -> str:
+    """Helper function to read PDF via DocHandler instance."""
+    if hasattr(handler, "read_pdf"):
+        return handler.read_pdf(path)  # type: ignore
+    if hasattr(handler, "read_"):
+        return handler.read_(path)  # type: ignore
+    raise RuntimeError("DocHandler has neither read_pdf nor read_ method.")
 
 #complete logic for the document analysis 
 @app.post("/analyze")   #Route to document analysis page
 async def analyze_document(file: UploadFile = File(...)) -> Any: #along with that route this method is appended
     try:
 
-        dh = DocHandler() #creaing an instance
+        dh = DocHandler() #creating an instance
         saved_path = dh.save_pdf(FastAPIFileAdapter(file)) #saving the file with FastAPIFileAdapter
         text = _read_pdf_via_handler(dh, saved_path)
 
@@ -84,7 +100,7 @@ async def analyze_document(file: UploadFile = File(...)) -> Any: #along with tha
 async def compare_documents(reference: UploadFile = File(...), actual: UploadFile = File(...)) -> Any:
     try:
 
-        dc = DocumnetComparator()
+        dc = DocumentComparator()
         ref_path, act_path = dc.save_uploaded_files(FastAPIFileAdapter(reference), FastAPIFileAdapter(actual))
         _ = ref_path, act_path   #i think its for session id
         combined_text = dc.combine_documents()
@@ -117,7 +133,7 @@ async def chat_build_index(
             use_session_dirs=use_session_dirs,
             session_id=session_id or None,
         ) #creating the instance of ChatIngestor class
-        ci.build_retriever(wrapped, chunk_size=chunk_size, chunk_overlap=chunk_overlap, k=k) #calling the build_ret
+        ci.built_retriver(wrapped, chunk_size=chunk_size, chunk_overlap=chunk_overlap, k=k) #calling the build_ret
         return {"session_id": ci.session_id, "k": k, "use_session_dirs": use_session_dirs}
     
     except HTTPException:
@@ -166,4 +182,6 @@ async def chat_query(
 
 # command for executing the fast api
 #Please note: change directory to api folder before running the below command
+# uvicorn api.main:app --port 8000 --reload (this with port)
+# or
 # uvicorn api.main:app --reload
