@@ -38,14 +38,14 @@ class FaissManager:
         
         #Metapath to keep the metadata
         self.meta_path = self.index_dir / "ingested_meta.json"
-        self._meta: Dict[str, Any] = {"rows": {}}
+        self._meta: Dict[str, Any] = {"rows": {}}   #this is dict of rows to keep the track of the data
         
         #validate the metapath
         if self.meta_path.exists():
             try:
-                self._meta = json.loads(self.meta_path.read_text(encoding="utf-8")) or {"rows": {}}
+                self._meta = json.loads(self.meta_path.read_text(encoding="utf-8")) or {"rows": {}}  #load it if its already there
             except Exception:
-                self._meta = {"rows": {}} #if the metapath doesn't exist assign it like this
+                self._meta = {"rows": {}} #if the metapath doesn't exist assign/initialise it like this
         
         #define the model loaders
         self.model_loader = model_loader or ModelLoader()
@@ -91,6 +91,8 @@ class FaissManager:
         return len(new_docs)
     
     def load_or_create(self,texts:Optional[List[str]]=None, metadatas: Optional[List[dict]] = None):   #to load the vdb
+
+        #if we are running for the first time it not come here
         if self._exists():
             self.vs = FAISS.load_local(
                 str(self.index_dir),
@@ -165,6 +167,8 @@ class ChatIngestor:
                 raise ValueError("No valid documents loaded")
             
             chunks = self._split(docs, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+
+            #Second very very import class for faiss index
             fm = FaissManager(self.faiss_dir, self.model_loader)
             
             texts = [c.page_content for c in chunks]
