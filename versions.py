@@ -1,6 +1,3 @@
-#This code prints the versions of various installed packages in the environment.
-#Please make sure you're in a Python environment where these packages are installed.
-
 import importlib.metadata
 packages = [
     "langchain",
@@ -19,7 +16,8 @@ packages = [
     "fastapi",
     "uvicorn",
     "python-multipart",
-    "docx2txt"
+    "docx2txt",
+    "pypdf"
 ]
 for pkg in packages:
     try:
@@ -27,3 +25,7 @@ for pkg in packages:
         print(f"{pkg}=={version}")
     except importlib.metadata.PackageNotFoundError:
         print(f"{pkg} (not installed)")
+
+# # serve static & templates
+# app.mount("/static", StaticFiles(directory="../static"), name="static")
+# templates = Jinja2Templates(directory="../templates")

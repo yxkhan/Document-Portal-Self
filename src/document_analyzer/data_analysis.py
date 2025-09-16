@@ -22,7 +22,7 @@ class DocumentAnalyzer:
             self.llm=self.loader.load_llm()
             
             # Prepare parsers
-            self.parser = JsonOutputParser(pydantic_object=Metadata)   # Use pydantic model for output validation
+            self.parser = JsonOutputParser(pydantic_object=Metadata)   # Uses the custom defined pydantic model for output validation
             self.fixing_parser = OutputFixingParser.from_llm(parser=self.parser, llm=self.llm)  #Use OutputFixingParser to ensure the output is valid according to the Metadata model
             
             self.prompt = PROMPT_REGISTRY["document_analysis"]
@@ -41,7 +41,7 @@ class DocumentAnalyzer:
         Analyze a document's text and extract structured metadata & summary.
         """
         try:
-            chain = self.prompt | self.llm | self.fixing_parser
+            chain = self.prompt | self.llm | self.fixing_parser #just forming a chain
             
             self.log.info("Meta-data analysis chain initialized")
 
@@ -57,3 +57,5 @@ class DocumentAnalyzer:
         except Exception as e:
             self.log.error("Metadata analysis failed", error=str(e))
             raise DocumentPortalException("Metadata extraction failed") from e
+
+#Samajga dada ye pura process

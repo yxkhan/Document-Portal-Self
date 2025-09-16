@@ -1,60 +1,66 @@
-#Lets create a custom logger for the Document Portal application
-import os
-import logging
-from datetime import datetime
-import structlog
+# Lets create a custom logger for the Document Portal application
+
+import os                  # For working with directories and file paths
+import logging             # Python’s built-in logging library
+from datetime import datetime   # To generate timestamped log filenames
+import structlog           # External library for structured (JSON) logging
 
 class CustomLogger:
     def __init__(self, log_dir="logs"):
         # Ensure logs directory exists
-        self.logs_dir = os.path.join(os.getcwd(), log_dir)
-        os.makedirs(self.logs_dir, exist_ok=True)
+        self.logs_dir = os.path.join(os.getcwd(), log_dir)   # Create absolute path to "logs" folder inside current working directory
+        os.makedirs(self.logs_dir, exist_ok=True)            # Create "logs" folder if it doesn’t already exist
 
         # Timestamped log file (for persistence)
-        log_file = f"{datetime.now().strftime('%m_%d_%Y_%H_%M_%S')}.log"
-        self.log_file_path = os.path.join(self.logs_dir, log_file)
+        log_file = f"{datetime.now().strftime('%m_%d_%Y_%H_%M_%S')}.log"  # Example: 09_15_2025_00_30_12.log
+        self.log_file_path = os.path.join(self.logs_dir, log_file)        # Full path of log file inside logs directory
 
-    def get_logger(self, name=__file__):
+    def get_logger(self, name=__file__):    #here it might pass the full path of the file
+        # Get just the filename part (e.g., custom_logger.py instead of full path)
         logger_name = os.path.basename(name)
 
-        # Configure logging for console + file (both JSON)
+        # Create file handler for logging to a file (file_handler configurations)
+        file_handler = logging.FileHandler(self.log_file_path)   # Log file will be created inside logs/
+        file_handler.setLevel(logging.INFO)                      # Minimum log level = INFO
+        file_handler.setFormatter(logging.Formatter("%(message)s"))  # Output raw JSON lines only
 
-        # Create file handler for JSON logging in on the logs file
-        file_handler = logging.FileHandler(self.log_file_path)
-        file_handler.setLevel(logging.INFO)
-        file_handler.setFormatter(logging.Formatter("%(message)s"))  # Raw JSON lines
-
-        # Create console handler for JSON logging in the console
-        console_handler = logging.StreamHandler()
+        # Create console handler for logging to console (stdout)
+        console_handler = logging.StreamHandler()     #StreamHandler to display the logs on terminal itself
         console_handler.setLevel(logging.INFO)
-        console_handler.setFormatter(logging.Formatter("%(message)s"))
+        console_handler.setFormatter(logging.Formatter("%(message)s")) #Ensures only the log message (not Python’s default [INFO] logger-name: message) is shown.
 
+        # Configure root logger with both handlers (console + file)
         logging.basicConfig(
-            level=logging.INFO,
-            format="%(message)s",  # Structlog will handle JSON rendering
-            handlers=[console_handler, file_handler]
+            level=logging.INFO,       # Root logger level = INFO
+            format="%(message)s",     # Structlog will override formatting to JSON
+            handlers=[console_handler, file_handler]  #ch sends info to terminal and fh sends info to log file
         )
 
         # Configure structlog for JSON structured logging
         structlog.configure(
             processors=[
-                structlog.processors.TimeStamper(fmt="iso", utc=True, key="timestamp"),
-                structlog.processors.add_log_level,
-                structlog.processors.EventRenamer(to="event"),
-                structlog.processors.JSONRenderer()
+                structlog.processors.TimeStamper(fmt="iso", utc=True, key="timestamp"), # Add ISO timestamp
+                structlog.processors.add_log_level,                                     # Include log level (info/error/etc.)
+                structlog.processors.EventRenamer(to="event"),                          # Rename 'msg' to 'event'
+                structlog.processors.JSONRenderer()                                     # Render output as JSON
             ],
-            logger_factory=structlog.stdlib.LoggerFactory(),
-            cache_logger_on_first_use=True,
+            logger_factory=structlog.stdlib.LoggerFactory(),  # Integrates with Python’s logging (logging.basicConfig)
+            cache_logger_on_first_use=True,                   # Cache for performance
         )
 
+        # Return a structured logger instance
         return structlog.get_logger(logger_name)
 
 
-# # --- Usage Example ---
+# --- Usage Example ---
 if __name__ == "__main__":
-    logger = CustomLogger().get_logger(__file__)
-    logger.info("User uploaded a file", user_id=123, filename="report.pdf")
+    logger = CustomLogger().get_logger(__file__)   # Create logger with current file name
+    logger.info("User uploaded a file", user_id=123, filename="report.pdf")  
+    # Produces JSON log with timestamp, level=info, event="User uploaded a file", user_id=123, filename=report.pdf
+
     logger.error("Failed to process PDF", error="File not found", user_id=123)
+    # Produces JSON log with timestamp, level=error, event="Failed to process PDF", error="File not found", user_id=123
+
 
 
 
