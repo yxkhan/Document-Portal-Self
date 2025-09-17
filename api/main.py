@@ -179,37 +179,57 @@ async def chat_build_index(
 # ---------- CHAT: QUERY ----------
 @app.post("/chat/query")
 async def chat_query(
-    question: str = Form(...),                       # user query
-    session_id: Optional[str] = Form(None),          # session for context
-    use_session_dirs: bool = Form(True),
-    k: int = Form(5),
+    question: str = Form(...),                       # user query from frontend
+    session_id: Optional[str] = Form(None),          # session ID to pick correct FAISS index
+    use_session_dirs: bool = Form(True),             # whether to use session-specific FAISS dirs
+    k: int = Form(5),                                # how many chunks to retrieve (top-k)
 ) -> Any:
     """Query previously indexed documents (RAG pipeline)."""
     try:
         log.info(f"Received chat query: '{question}' | session: {session_id}")
         
+        # --- 1️⃣ Validation ---
         if use_session_dirs and not session_id:
+            # If working in session mode but no session_id provided → error
             raise HTTPException(status_code=400, detail="session_id is required when use_session_dirs=True")
 
-        # Decide FAISS index path
+        # --- 2️⃣ Locate the FAISS index directory ---
         index_dir = os.path.join(FAISS_BASE, session_id) if use_session_dirs else FAISS_BASE
         if not os.path.isdir(index_dir):
+            # If the directory doesn’t exist → no index was built yet
             raise HTTPException(status_code=404, detail=f"FAISS index not found at: {index_dir}")
 
-        # Initialize Conversational RAG
-        rag = ConversationalRAG(session_id=session_id)
-        rag.load_retriever_from_faiss(index_dir, k=k, index_name=FAISS_INDEX_NAME)
+        # --- 3️⃣ Initialize Conversational RAG ---
+        rag = ConversationalRAG(session_id=session_id)  # Create RAG engine tied to this session
+        rag.load_retriever_from_faiss(
+            index_dir, 
+            k=k, 
+            index_name=FAISS_INDEX_NAME                # loads FAISS retriever with top-k setup
+        )
         
-        # Run query through retriever + LLM
-        response = rag.invoke(question, chat_history=[])
+        # --- 4️⃣ Run user question through retriever + LLM ---
+        response = rag.invoke(
+            question, 
+            chat_history=[]   # currently no memory → stateless queries
+        )
         
+        # --- 5️⃣ Return the answer ---
         log.info("Chat query handled successfully.")
-        return {"answer": response, "session_id": session_id, "k": k, "engine": "LCEL-RAG"}
+        return {
+            "answer": response,       # final LLM response
+            "session_id": session_id, # session used for retrieval
+            "k": k,                   # retrieval depth
+            "engine": "LCEL-RAG"      # engine identifier
+        }
+    
     except HTTPException:
-        raise
+        raise   # rethrow FastAPI-level HTTP errors
+    
     except Exception as e:
+        # Any other runtime error
         log.exception("Chat query failed")
         raise HTTPException(status_code=500, detail=f"Query failed: {e}")
+
 
 
 # ---------- Run Instructions ----------
