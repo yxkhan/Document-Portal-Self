@@ -96,3 +96,4 @@ https://console.groq.com/keys
 ```
 https://aistudio.google.com/app/apikey
 ```
+## Code is up and running fine
